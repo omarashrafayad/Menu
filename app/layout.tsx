@@ -3,6 +3,7 @@ import { Outfit } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Providers from "@/components/providers";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -26,11 +27,13 @@ export default function RootLayout({
       className={`${outfit.variable} h-full antialiased dark`}
     >
       <body className="min-h-full flex flex-col bg-black text-white selection:bg-brand-gold selection:text-black">
-        <Navbar />
-        <main className="flex-1 flex flex-col pt-[72px] md:pt-[80px] w-full overflow-x-hidden">
-          {children}
-        </main>
-        <Footer />
+        <Providers>
+          <Navbar />
+          <main className="flex-1 flex flex-col pt-[72px] md:pt-[80px] w-full overflow-x-hidden">
+            {children}
+          </main>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );
