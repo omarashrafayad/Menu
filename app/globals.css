@@ -1,26 +1,78 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #000000;
+  --foreground: #ffffff;
+  --brand-gold: #e39a3c;
+  --brand-red: #d9383a;
+  --card-bg: #161616;
+  --card-bg-light: #222222;
+  --card-border: rgba(227, 154, 60, 0.15);
+  --card-border-red: rgba(217, 56, 58, 0.15);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-brand-gold: var(--brand-gold);
+  --color-brand-red: var(--brand-red);
+  --color-card-bg: var(--card-bg);
+  --color-card-bg-light: var(--card-bg-light);
+  --color-card-border: var(--card-border);
+  --color-card-border-red: var(--card-border-red);
+  --font-sans: var(--font-outfit), system-ui, -apple-system, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+html,
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
 }
+
+/* Custom Scrollbar for premium feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #222222;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-gold);
+}
+
+/* Glassmorphism utilities */
+.glass-panel {
+  background: rgba(22, 22, 22, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.gold-gradient-border {
+  position: relative;
+  background: #161616;
+  background-clip: padding-box;
+  border: 1px solid transparent;
+}
+
+.gold-gradient-border::after {
+  position: absolute;
+  top: -1px; bottom: -1px; left: -1px; right: -1px;
+  background: linear-gradient(135deg, var(--brand-gold), rgba(227, 154, 60, 0.1), #161616);
+  content: '';
+  z-index: -1;
+  border-radius: inherit;
+}
+
