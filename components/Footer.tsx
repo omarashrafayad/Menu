@@ -1,9 +1,13 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useLanguage } from "@/lib/translations";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const { t } = useLanguage();
 
   return (
     <footer className="bg-black border-t border-white/5 py-12 px-6">
@@ -32,7 +36,7 @@ export default function Footer() {
             rel="noopener noreferrer"
             className="hover:text-brand-gold transition-colors duration-300"
           >
-            Facebook
+            {t("footer.facebook")}
           </a>
           <a
             href="https://instagram.com"
@@ -40,19 +44,19 @@ export default function Footer() {
             rel="noopener noreferrer"
             className="hover:text-brand-gold transition-colors duration-300"
           >
-            Instagram
+            {t("footer.instagram")}
           </a>
           <Link
             href="/about#contact"
             className="hover:text-brand-gold transition-colors duration-300"
           >
-            Contact Us
+            {t("footer.contactUs")}
           </Link>
         </div>
 
         {/* Copyright */}
         <p className="text-xs text-white/40 tracking-wider">
-          © {currentYear} Take Five. All rights reserved.
+          {t("footer.copyright", { year: currentYear })}
         </p>
       </div>
     </footer>

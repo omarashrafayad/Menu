@@ -5,12 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { getMenuItems, getCategories, MenuItem, Category } from "@/lib/menuService";
+import { useLanguage } from "@/lib/translations";
 
 export default function MenuPage() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
-  
-  // Language toggle: English ("en") or Arabic ("ar")
-  const [lang, setLang] = useState<"en" | "ar">("en");
+  const { lang, t } = useLanguage();
 
   // Fetch menu items and categories from Firestore using React Query
   const { data: menuItems = [], isLoading: isLoadingItems, error: itemsError } = useQuery<MenuItem[]>({
@@ -24,7 +23,7 @@ export default function MenuPage() {
   });
 
   const categories = [
-    { id: "all", name: lang === "ar" ? "الكل" : "All" },
+    { id: "all", name: t("menu.all") },
     ...dbCategories.map((cat) => ({ 
       id: cat.id, 
       name: lang === "ar" ? cat.nameAr : cat.nameEn 
@@ -87,15 +86,13 @@ export default function MenuPage() {
   // Error State
   if (error) {
     return (
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-16 text-center flex flex-col items-center justify-center gap-4" dir={lang === "ar" ? "rtl" : "ltr"}>
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-16 text-center flex flex-col items-center justify-center gap-4">
         <span className="text-4xl">⚠️</span>
         <h2 className="text-xl font-bold text-brand-red uppercase">
-          {lang === "ar" ? "خطأ في الاتصال" : "Connection Error"}
+          {t("menu.connectionError")}
         </h2>
         <p className="text-white/60 max-w-md font-light">
-          {lang === "ar" 
-            ? "تعذر تحميل قائمة المنيو. يرجى التحقق من اتصال الإنترنت وقواعد أمان Firestore الخاصة بك." 
-            : "Could not load the menu items. Please check your internet connection and Firestore rules configuration."}
+          {t("menu.connectionErrorDesc")}
         </p>
       </div>
     );
@@ -104,21 +101,19 @@ export default function MenuPage() {
   // Seed Empty State
   if (menuItems.length === 0) {
     return (
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-16 text-center flex flex-col items-center justify-center gap-6" dir={lang === "ar" ? "rtl" : "ltr"}>
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-16 text-center flex flex-col items-center justify-center gap-6">
         <span className="text-5xl">🍽️</span>
         <h2 className="text-2xl font-extrabold text-white">
-          {lang === "ar" ? "قائمة الطعام فارغة" : "Your Menu is Empty"}
+          {t("menu.emptyTitle")}
         </h2>
         <p className="text-white/60 max-w-md font-light leading-relaxed">
-          {lang === "ar" 
-            ? "يبدو أنك لم تقم بإضافة أي أطباق إلى قاعدة البيانات بعد. اذهب إلى لوحة التحكم للبدء وتعبئة القائمة." 
-            : "It looks like you haven't added any items to Firestore yet. Head over to the Dashboard to create your menu or seed the default items."}
+          {t("menu.emptyDesc")}
         </p>
         <Link
           href="/dashboard"
           className="px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider bg-brand-gold text-black hover:scale-105 hover:bg-brand-gold/90 transition-all duration-300 shadow-lg shadow-brand-gold/15"
         >
-          {lang === "ar" ? "فتح لوحة التحكم" : "Open Menu Dashboard"}
+          {t("menu.openDashboard")}
         </Link>
       </div>
     );
@@ -127,42 +122,19 @@ export default function MenuPage() {
   return (
     <div 
       className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-10 md:py-16 flex flex-col gap-12 overflow-x-hidden transition-all duration-300"
-      dir={lang === "ar" ? "rtl" : "ltr"}
     >
       
-      {/* Header with Language Selector */}
+      {/* Header */}
       <div className="relative flex flex-col gap-4 text-center max-w-xl mx-auto w-full">
-        {/* Language Floating Selector */}
-        <div className="absolute -top-12 left-1/2 -translate-x-1/2 flex bg-card-bg border border-white/5 rounded-full p-1 text-xs shadow-md select-none">
-          <button
-            onClick={() => setLang("en")}
-            className={`px-3 py-1 rounded-full font-bold uppercase transition-all ${
-              lang === "en" ? "bg-brand-gold text-black" : "text-white/50 hover:text-white"
-            }`}
-          >
-            English
-          </button>
-          <button
-            onClick={() => setLang("ar")}
-            className={`px-3 py-1 rounded-full font-bold uppercase transition-all ${
-              lang === "ar" ? "bg-brand-gold text-black" : "text-white/50 hover:text-white"
-            }`}
-          >
-            العربية
-          </button>
-        </div>
-
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-tight mt-4">
           {lang === "ar" ? (
-            <>تذوق متعة <span className="text-brand-red uppercase">الجرأة</span></>
+            <>تذوق متعة <span className="text-brand-red uppercase">{t("menu.bold")}</span></>
           ) : (
-            <>Taste the <span className="text-brand-red uppercase">Boldness</span></>
+            <>Taste the <span className="text-brand-red uppercase">{t("menu.bold")}</span></>
           )}
         </h1>
         <p className="text-xs sm:text-sm md:text-base text-white/70 font-light leading-relaxed">
-          {lang === "ar" 
-            ? "استكشف قائمة طعام الشارع الحضري الخاصة بنا، والمصممة لمن يقدرون السرعة والمذاق الرائع."
-            : "Explore our urban street-inspired menu, crafted for those who value speed and flavor."}
+          {t("menu.description")}
         </p>
       </div>
 

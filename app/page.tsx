@@ -1,14 +1,19 @@
+"use client";
+
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Star } from "lucide-react";
+import { useLanguage } from "@/lib/translations";
 
 export default function Home() {
+  const { t } = useLanguage();
+
   const popularBites = [
     {
       id: "urban-double",
-      title: "Urban Double",
-      description: "Two smashed patties, triple cheese, secret Take Five sauce, caramelised onions on a brioche bun.",
+      title: t("home.popular.urbanDouble.title"),
+      description: t("home.popular.urbanDouble.description"),
       price: "$14.50",
       image: "/images/hero.png", // Reusing our high-quality generated hero burger
       tag: "POPULAR",
@@ -16,8 +21,8 @@ export default function Home() {
     },
     {
       id: "pepperoni-pizza",
-      title: "Hot Honey Pepperoni",
-      description: "Crispy pepperoni cups, organic tomato sauce, mozzarella, drizzled with sweet and spicy hot honey.",
+      title: t("home.popular.pepperoniPizza.title"),
+      description: t("home.popular.pepperoniPizza.description"),
       price: "$18.00",
       image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=600&q=80",
       tag: "POPULAR",
@@ -25,8 +30,8 @@ export default function Home() {
     },
     {
       id: "truffle-fries",
-      title: "Truffle Loaded Fries",
-      description: "Hand-cut crispy fries, premium truffle oil, freshly grated parmesan, and roasted garlic aioli.",
+      title: t("home.popular.truffleFries.title"),
+      description: t("home.popular.truffleFries.description"),
       price: "$10.50",
       image: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=600&q=80",
       tag: "POPULAR",
@@ -44,23 +49,28 @@ export default function Home() {
           {/* Hero Typography */}
           <div className="flex flex-col gap-6 lg:col-span-7 text-center lg:text-left items-center lg:items-start order-2 lg:order-1 z-10">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-tight max-w-xl text-white">
-              Experience the <span className="text-brand-gold relative inline-block">Taste<span className="absolute left-0 bottom-0 w-full h-[6px] bg-brand-gold/20 rounded-full"></span></span> of Take Five
+              {t("home.experience")}{" "}
+              <span className="text-brand-gold relative inline-block">
+                {t("home.taste")}
+                <span className="absolute left-0 bottom-0 w-full h-[6px] bg-brand-gold/20 rounded-full"></span>
+              </span>{" "}
+              {t("home.ofTakeFive")}
             </h1>
             <p className="text-base sm:text-lg text-white/70 max-w-lg leading-relaxed font-light">
-              Modern urban flavors crafted with passion. Bold ingredients, premium quality, delivered to your door.
+              {t("home.description")}
             </p>
             <div className="mt-4 flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
               <Link
                 href="/menu"
                 className="px-8 py-4 bg-brand-gold text-black font-semibold rounded-full text-center hover:bg-brand-gold/90 transition-all duration-350 shadow-lg shadow-brand-gold/10 hover:scale-105 active:scale-95"
               >
-                View Menu
+                {t("home.viewMenu")}
               </Link>
               <Link
                 href="/about"
                 className="px-8 py-4 border border-white/20 hover:border-brand-gold text-white font-semibold rounded-full text-center transition-all duration-350 hover:bg-white/5"
               >
-                Our Story
+                {t("home.ourStory")}
               </Link>
             </div>
           </div>
@@ -86,16 +96,16 @@ export default function Home() {
       <section className="px-6 max-w-7xl mx-auto w-full">
         <div className="flex items-end justify-between mb-8">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-            Popular Bites
+            {t("home.popularBites")}
           </h2>
           <Link
             href="/menu"
             className="flex items-center gap-2 text-sm font-semibold text-brand-gold hover:text-brand-gold/80 transition-colors duration-300 group"
           >
-            See All{" "}
+            {t("home.seeAll")}{" "}
             <ArrowRight
               size={16}
-              className="group-hover:translate-x-1 transition-transform duration-300"
+              className="group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform duration-300"
             />
           </Link>
         </div>
@@ -140,7 +150,7 @@ export default function Home() {
                     href={`/menu#${bite.id}`}
                     className="text-xs uppercase tracking-wider font-semibold text-white/80 hover:text-white border-b border-transparent hover:border-white transition-all duration-300"
                   >
-                    View Details
+                    {t("home.viewDetails")}
                   </Link>
                 </div>
               </div>
@@ -163,10 +173,10 @@ export default function Home() {
             </div>
 
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-brand-gold">
-              Take Five Rewards
+              {t("home.rewardsTitle")}
             </h2>
             <p className="text-sm sm:text-base text-white/70 max-w-md leading-relaxed font-light">
-              Join our inner circle and earn points for every dollar spent. It's time your appetite paid you back.
+              {t("home.rewardsDesc")}
             </p>
 
             {/* Progress bar container */}
@@ -178,7 +188,7 @@ export default function Home() {
                 ></div>
               </div>
               <p className="text-xs text-white/50 font-light tracking-wide mt-1">
-                You're 250 points away from a FREE Urban Double!
+                {t("home.rewardsProgress")}
               </p>
             </div>
           </div>

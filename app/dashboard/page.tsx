@@ -31,10 +31,10 @@ import {
   FolderPlus,
   LayoutGrid,
   Settings,
-  Languages
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useLanguage } from "@/lib/translations";
 
 export default function DashboardPage() {
   const queryClient = useQueryClient();
@@ -43,8 +43,8 @@ export default function DashboardPage() {
   // Tab Management: "items" or "categories"
   const [activeTab, setActiveTab] = useState<"items" | "categories">("items");
   
-  // Dashboard view language toggle
-  const [lang, setLang] = useState<"en" | "ar">("en");
+  // Dashboard view language toggle connected to global context
+  const { lang, t } = useLanguage();
 
   // Search & Filter State
   const [searchTerm, setSearchTerm] = useState("");
@@ -87,6 +87,7 @@ export default function DashboardPage() {
   // Auto-select first category if available when form loads
   useEffect(() => {
     if (categories.length > 0 && !formData.category && !editingId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData(prev => ({ ...prev, category: categories[0].id }));
     }
   }, [categories, formData.category, editingId]);
@@ -96,7 +97,7 @@ export default function DashboardPage() {
     mutationFn: addMenuItem,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["menuItems"] });
-      showFeedback("Item added successfully!", "success");
+      showFeedback(t("dashboard.successAdd"), "success");
       resetForm();
     },
     onError: () => {
@@ -109,7 +110,7 @@ export default function DashboardPage() {
       updateMenuItem(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["menuItems"] });
-      showFeedback("Item updated successfully!", "success");
+      showFeedback(t("dashboard.successUpdate"), "success");
       resetForm();
     },
     onError: () => {
@@ -121,7 +122,7 @@ export default function DashboardPage() {
     mutationFn: deleteMenuItem,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["menuItems"] });
-      showFeedback("Item deleted successfully!", "success");
+      showFeedback(t("dashboard.successDelete"), "success");
     },
     onError: () => {
       showFeedback("Failed to delete item.", "error");
@@ -133,7 +134,7 @@ export default function DashboardPage() {
     mutationFn: addCategory,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
-      showFeedback("Category added successfully!", "success");
+      showFeedback(t("dashboard.successAddCat"), "success");
       clearCatForm();
     },
     onError: () => {
@@ -146,7 +147,7 @@ export default function DashboardPage() {
       updateCategory(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
-      showFeedback("Category updated successfully!", "success");
+      showFeedback(t("dashboard.successUpdateCat"), "success");
       clearCatForm();
     },
     onError: () => {
@@ -159,7 +160,7 @@ export default function DashboardPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       queryClient.invalidateQueries({ queryKey: ["menuItems"] });
-      showFeedback("Category deleted successfully!", "success");
+      showFeedback(t("dashboard.successDeleteCat"), "success");
     },
     onError: () => {
       showFeedback("Failed to delete category.", "error");
@@ -171,7 +172,7 @@ export default function DashboardPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       queryClient.invalidateQueries({ queryKey: ["menuItems"] });
-      showFeedback("Database seeded with bilingual items and categories!", "success");
+      showFeedback(t("dashboard.successSeed"), "success");
     },
     onError: () => {
       showFeedback("Failed to seed database.", "error");
@@ -220,7 +221,7 @@ export default function DashboardPage() {
     e.preventDefault();
 
     if (!formData.titleEn || !formData.titleAr || !formData.price || !formData.category) {
-      showFeedback("Title (EN & AR), Price, and Category are required!", "error");
+      showFeedback(t("dashboard.requiredFieldsError"), "error");
       return;
     }
 
@@ -230,9 +231,9 @@ export default function DashboardPage() {
       setIsUploading(true);
       try {
         finalImageUrl = await uploadImage(imageFile);
-      } catch (err: any) {
+      } catch (err) {
         console.error(err);
-        showFeedback("Failed to upload image to Cloudinary.", "error");
+        showFeedback(t("dashboard.cloudinaryUploadError"), "error");
         setIsUploading(false);
         return;
       }
@@ -274,7 +275,7 @@ export default function DashboardPage() {
   const handleCatSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!catNameEn.trim() || !catNameAr.trim()) {
-      showFeedback("Category names in English and Arabic are required!", "error");
+      showFeedback(t("dashboard.categoryRequiredError"), "error");
       return;
     }
 
@@ -338,39 +339,22 @@ export default function DashboardPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-white/5">
         <div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
-            Menu <span className="text-brand-gold uppercase">Dashboard</span>
+            {lang === "ar" ? (
+              <>لوحة <span className="text-brand-gold uppercase">التحكم</span></>
+            ) : (
+              <>Menu <span className="text-brand-gold uppercase">Dashboard</span></>
+            )}
           </h1>
           <p className="text-xs sm:text-sm text-white/60 font-light mt-1">
-            Configure dynamic bilingual categories and construct simplified menu items.
+            {t("dashboard.desc")}
           </p>
         </div>
         <div className="flex items-center gap-3">
-          
-          {/* Language Toggle */}
-          <div className="flex bg-card-bg border border-white/5 rounded-full p-1 text-xs">
-            <button
-              onClick={() => setLang("en")}
-              className={`px-3 py-1.5 rounded-full font-bold uppercase transition-all flex items-center gap-1 ${
-                lang === "en" ? "bg-brand-gold text-black" : "text-white/50 hover:text-white"
-              }`}
-            >
-              EN
-            </button>
-            <button
-              onClick={() => setLang("ar")}
-              className={`px-3 py-1.5 rounded-full font-bold uppercase transition-all flex items-center gap-1 ${
-                lang === "ar" ? "bg-brand-gold text-black" : "text-white/50 hover:text-white"
-              }`}
-            >
-              AR
-            </button>
-          </div>
-
           <Link 
             href="/menu" 
             className="px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider bg-card-bg border border-white/5 hover:border-white/20 transition-all text-white flex items-center gap-2"
           >
-            View Live Menu
+            {t("dashboard.viewLive")}
           </Link>
           {menuItems.length === 0 && categories.length === 0 && !isLoading && (
             <button
@@ -383,7 +367,7 @@ export default function DashboardPage() {
               ) : (
                 <Sparkles size={14} />
               )}
-              Seed Defaults
+              {t("dashboard.seedBtn")}
             </button>
           )}
         </div>
@@ -399,7 +383,7 @@ export default function DashboardPage() {
               : "border-transparent text-white/50 hover:text-white"
           }`}
         >
-          <LayoutGrid size={14} /> Menu Items ({menuItems.length})
+          <LayoutGrid size={14} /> {t("dashboard.tabItems")} ({menuItems.length})
         </button>
         <button
           onClick={() => { setActiveTab("categories"); clearCatForm(); }}
@@ -409,7 +393,7 @@ export default function DashboardPage() {
               : "border-transparent text-white/50 hover:text-white"
           }`}
         >
-          <Settings size={14} /> Categories ({categories.length})
+          <Settings size={14} /> {t("dashboard.tabCategories")} ({categories.length})
         </button>
       </div>
 
@@ -434,10 +418,10 @@ export default function DashboardPage() {
             <div>
               <h2 className="text-base font-bold text-white flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-brand-gold"></span>
-                {editingId ? "Edit Menu Item" : "Create Menu Item"}
+                {editingId ? t("dashboard.editItem") : t("dashboard.createItem")}
               </h2>
               <p className="text-[11px] text-white/50 mt-1">
-                Provide bilingual values, pricing, dynamic categories, and upload image.
+                {t("dashboard.itemFormDesc")}
               </p>
             </div>
 
@@ -446,14 +430,14 @@ export default function DashboardPage() {
               {/* Title (English) */}
               <div className="flex flex-col gap-1.5">
                 <label htmlFor="titleEn" className="text-xs font-bold text-white/70 uppercase tracking-wider flex items-center justify-between">
-                  <span>Title (English) <span className="text-brand-red">*</span></span>
+                  <span>{t("dashboard.fieldTitleEn")} <span className="text-brand-red">*</span></span>
                   <span className="text-[10px] text-brand-gold lowercase select-none">EN</span>
                 </label>
                 <input
                   id="titleEn"
                   type="text"
                   required
-                  placeholder="e.g. Smash Cheeseburger"
+                  placeholder={t("dashboard.fieldTitleEnPlaceholder")}
                   value={formData.titleEn}
                   onChange={(e) => setFormData({ ...formData, titleEn: e.target.value })}
                   className="w-full bg-black border border-white/10 focus:border-brand-gold rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition-all"
@@ -463,7 +447,7 @@ export default function DashboardPage() {
               {/* Title (Arabic) */}
               <div className="flex flex-col gap-1.5">
                 <label htmlFor="titleAr" className="text-xs font-bold text-white/70 uppercase tracking-wider flex items-center justify-between">
-                  <span>سماش تشيز برجر <span className="text-brand-red">*</span></span>
+                  <span>{t("dashboard.fieldTitleAr")} <span className="text-brand-red">*</span></span>
                   <span className="text-[10px] text-brand-gold lowercase select-none">AR (العربية)</span>
                 </label>
                 <input
@@ -471,7 +455,7 @@ export default function DashboardPage() {
                   type="text"
                   required
                   dir="rtl"
-                  placeholder="مثال: سماش تشيز برجر"
+                  placeholder={t("dashboard.fieldTitleArPlaceholder")}
                   value={formData.titleAr}
                   onChange={(e) => setFormData({ ...formData, titleAr: e.target.value })}
                   className="w-full bg-black border border-white/10 focus:border-brand-gold rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition-all text-right"
@@ -482,13 +466,13 @@ export default function DashboardPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="price" className="text-xs font-bold text-white/70 uppercase tracking-wider">
-                    Price ($) <span className="text-brand-red">*</span>
+                    {t("dashboard.fieldPrice")} <span className="text-brand-red">*</span>
                   </label>
                   <input
                     id="price"
                     type="text"
                     required
-                    placeholder="e.g. 14.50"
+                    placeholder={t("dashboard.fieldPricePlaceholder")}
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                     className="w-full bg-black border border-white/10 focus:border-brand-gold rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition-all"
@@ -497,7 +481,7 @@ export default function DashboardPage() {
 
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="category" className="text-xs font-bold text-white/70 uppercase tracking-wider">
-                    Category <span className="text-brand-red">*</span>
+                    {t("dashboard.fieldCategory")} <span className="text-brand-red">*</span>
                   </label>
                   <select
                     id="category"
@@ -507,7 +491,7 @@ export default function DashboardPage() {
                     className="w-full bg-black border border-white/10 focus:border-brand-gold rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition-all"
                   >
                     {categories.length === 0 ? (
-                      <option value="" disabled>No categories available</option>
+                      <option value="" disabled>{t("dashboard.noCategoriesAvailable")}</option>
                     ) : (
                       categories.map((cat) => (
                         <option key={cat.id} value={cat.id}>
@@ -522,13 +506,13 @@ export default function DashboardPage() {
               {/* Description (English) */}
               <div className="flex flex-col gap-1.5">
                 <label htmlFor="descriptionEn" className="text-xs font-bold text-white/70 uppercase tracking-wider flex items-center justify-between">
-                  <span>Description (English)</span>
+                  <span>{t("dashboard.fieldDescEn")}</span>
                   <span className="text-[10px] text-brand-gold lowercase select-none">EN</span>
                 </label>
                 <textarea
                   id="descriptionEn"
                   rows={2}
-                  placeholder="Tell customers about sides, ingredients..."
+                  placeholder={t("dashboard.fieldDescEnPlaceholder")}
                   value={formData.descriptionEn}
                   onChange={(e) => setFormData({ ...formData, descriptionEn: e.target.value })}
                   className="w-full bg-black border border-white/10 focus:border-brand-gold rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition-all resize-none"
@@ -538,14 +522,14 @@ export default function DashboardPage() {
               {/* Description (Arabic) */}
               <div className="flex flex-col gap-1.5">
                 <label htmlFor="descriptionAr" className="text-xs font-bold text-white/70 uppercase tracking-wider flex items-center justify-between">
-                  <span>الوصف (العربية)</span>
+                  <span>{t("dashboard.fieldDescAr")}</span>
                   <span className="text-[10px] text-brand-gold lowercase select-none">AR (العربية)</span>
                 </label>
                 <textarea
                   id="descriptionAr"
                   rows={2}
                   dir="rtl"
-                  placeholder="وصف الطبق والمكونات والصلصات باللغة العربية..."
+                  placeholder={t("dashboard.fieldDescArPlaceholder")}
                   value={formData.descriptionAr}
                   onChange={(e) => setFormData({ ...formData, descriptionAr: e.target.value })}
                   className="w-full bg-black border border-white/10 focus:border-brand-gold rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition-all text-right resize-none"
@@ -555,7 +539,7 @@ export default function DashboardPage() {
               {/* Image Upload Area */}
               <div className="flex flex-col gap-2 p-4 bg-black/40 border border-dashed border-white/10 rounded-2xl">
                 <label className="text-xs font-bold text-white/70 uppercase tracking-wider flex items-center gap-1.5 cursor-pointer">
-                  <Upload size={12} className="text-brand-gold" /> Upload Image File
+                  <Upload size={12} className="text-brand-gold" /> {t("dashboard.dragDrop")}
                 </label>
                 <input
                   type="file"
@@ -587,24 +571,9 @@ export default function DashboardPage() {
                 ) : (
                   <div className="text-[10px] text-white/40 text-center py-2 flex items-center justify-center gap-1 select-none">
                     <FileImage size={12} />
-                    Selected preview image will appear here
+                    {t("dashboard.previewPlaceholder")}
                   </div>
                 )}
-                
-                <div className="relative flex py-1 items-center">
-                  <div className="flex-grow border-t border-white/5"></div>
-                  <span className="flex-shrink mx-2 text-[9px] text-white/30 uppercase tracking-wider">OR External URL</span>
-                  <div className="flex-grow border-t border-white/5"></div>
-                </div>
-
-                <input
-                  type="text"
-                  placeholder="https://example.com/item.jpg"
-                  value={formData.image}
-                  disabled={!!imageFile}
-                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                  className="w-full bg-black/60 border border-white/10 focus:border-brand-gold rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none transition-all disabled:opacity-50"
-                />
               </div>
 
               {/* Action Buttons */}
@@ -615,7 +584,7 @@ export default function DashboardPage() {
                     onClick={resetForm}
                     className="flex-1 py-2.5 border border-white/10 hover:border-white/20 text-white rounded-xl text-xs font-bold uppercase transition-all"
                   >
-                    Cancel
+                    {t("dashboard.cancelBtn")}
                   </button>
                 )}
                 <button
@@ -626,10 +595,10 @@ export default function DashboardPage() {
                   {(addMutation.isPending || updateMutation.isPending || isUploading) ? (
                     <Loader2 className="animate-spin" size={14} />
                   ) : editingId ? (
-                    "Update Item"
+                    t("dashboard.saveBtn")
                   ) : (
                     <span className="flex items-center gap-1.5">
-                      <Plus size={14} /> Add Item
+                      <Plus size={14} /> {t("dashboard.addBtn")}
                     </span>
                   )}
                 </button>
@@ -648,7 +617,7 @@ export default function DashboardPage() {
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" size={16} />
                 <input
                   type="text"
-                  placeholder="Search in English or Arabic..."
+                  placeholder={t("dashboard.searchPlaceholder")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full bg-black border border-white/10 focus:border-brand-gold rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none transition-all"
@@ -667,7 +636,7 @@ export default function DashboardPage() {
                         : "bg-black/50 border-white/5 text-white/60 hover:text-white hover:border-white/10"
                     }`}
                   >
-                    {lang === "ar" ? "الكل" : "All"}
+                    {t("menu.all")}
                   </button>
                   {categories.map((cat) => (
                     <button
@@ -690,30 +659,27 @@ export default function DashboardPage() {
             {isLoading ? (
               <div className="flex flex-col gap-4 py-12 items-center justify-center text-white/50 bg-card-bg border border-white/5 rounded-3xl">
                 <Loader2 className="animate-spin text-brand-gold" size={32} />
-                <span className="text-sm font-medium">Loading items...</span>
+                <span className="text-sm font-medium">{lang === "ar" ? "جاري التحميل..." : "Loading items..."}</span>
               </div>
             ) : hasError ? (
               <div className="bg-brand-red/10 border border-brand-red/20 rounded-2xl p-6 text-center text-brand-red">
-                Failed to load content. Please refresh or verify Firestore rules.
+                {lang === "ar" ? "فشل تحميل المحتوى. يرجى التحقق من قواعد Firestore." : "Failed to load content. Please refresh or verify Firestore rules."}
               </div>
             ) : filteredItems.length === 0 ? (
               <div className="bg-card-bg border border-white/5 rounded-3xl p-12 text-center flex flex-col items-center justify-center gap-3">
                 <span className="text-3xl">🍔</span>
-                <h3 className="text-base font-bold text-white mt-1">No Items Available</h3>
-                <p className="text-xs text-white/40 max-w-xs font-light">
-                  Add items to your selected category or seed defaults to start.
-                </p>
+                <h3 className="text-base font-bold text-white mt-1">{t("dashboard.noItems")}</h3>
               </div>
             ) : (
               <div className="overflow-x-auto w-full border border-white/5 rounded-3xl bg-card-bg shadow-xl">
                 <table className="w-full text-left border-collapse min-w-[600px]">
                   <thead>
                     <tr className="border-b border-white/10 bg-white/2 text-white/40 uppercase tracking-widest text-[9px] font-extrabold select-none">
-                      <th className="p-4 w-20">Image</th>
-                      <th className="p-4">Item Details ({lang.toUpperCase()})</th>
-                      <th className="p-4">Category</th>
-                      <th className="p-4">Price</th>
-                      <th className="p-4 text-right w-24">Actions</th>
+                      <th className="p-4 w-20">{lang === "ar" ? "الصورة" : "Image"}</th>
+                      <th className="p-4">{t("dashboard.itemDetails")} ({lang.toUpperCase()})</th>
+                      <th className="p-4">{t("dashboard.fieldCategory")}</th>
+                      <th className="p-4">{lang === "ar" ? "السعر" : "Price"}</th>
+                      <th className="p-4 text-right w-24">{t("dashboard.actions")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5 text-sm">
@@ -743,11 +709,11 @@ export default function DashboardPage() {
                               {title}
                             </div>
                             <div className="text-xs text-white/40 font-light truncate mt-0.5" title={desc}>
-                              {desc || "No description."}
+                              {desc || (lang === "ar" ? "لا يوجد وصف." : "No description.")}
                             </div>
                             {/* Subtitle with alternative language */}
                             <div className="text-[10px] text-white/30 italic truncate mt-0.5">
-                              Alt: {lang === "ar" ? item.titleEn : item.titleAr}
+                              {lang === "ar" ? "الاسم الآخر" : "Alt"}: {lang === "ar" ? item.titleEn : item.titleAr}
                             </div>
                           </td>
 
@@ -765,19 +731,19 @@ export default function DashboardPage() {
                             <div className="flex justify-end gap-1.5">
                               <button
                                 onClick={() => startEditItem(item)}
-                                title="Edit Item"
+                                title={t("dashboard.edit")}
                                 className="p-1.5 text-white/50 hover:text-brand-gold hover:bg-white/5 rounded-lg transition-all"
                               >
                                 <Edit3 size={15} />
                               </button>
                               <button
                                 onClick={() => {
-                                  if (confirm(`Are you sure you want to delete "${lang === 'ar' ? item.titleAr : item.titleEn}"?`)) {
+                                  if (confirm(lang === 'ar' ? `هل أنت متأكد من رغبتك في حذف "${item.titleAr}"؟` : `Are you sure you want to delete "${item.titleEn}"?`)) {
                                     deleteMutation.mutate(item.id);
                                   }
                                 }}
                                 disabled={deleteMutation.isPending}
-                                title="Delete Item"
+                                title={t("dashboard.delete")}
                                 className="p-1.5 text-white/50 hover:text-brand-red hover:bg-white/5 rounded-lg transition-all"
                               >
                                 {deleteMutation.isPending ? (
@@ -799,7 +765,10 @@ export default function DashboardPage() {
 
             {!isLoading && !hasError && filteredItems.length > 0 && (
               <div className="text-[10px] text-white/40 font-bold uppercase tracking-widest text-right mr-2">
-                Showing {filteredItems.length} of {menuItems.length} items
+                {lang === "ar" 
+                  ? `عرض ${filteredItems.length} من أصل ${menuItems.length} أطباق`
+                  : `Showing ${filteredItems.length} of ${menuItems.length} items`
+                }
               </div>
             )}
 
@@ -816,10 +785,10 @@ export default function DashboardPage() {
             <div>
               <h2 className="text-base font-bold text-white flex items-center gap-2">
                 <FolderPlus size={16} className="text-brand-gold" />
-                {editingCatId ? "Edit Category" : "Create Category"}
+                {editingCatId ? t("dashboard.editCat") : t("dashboard.createCat")}
               </h2>
               <p className="text-[11px] text-white/50 mt-1">
-                Add bilingual category names (e.g. Pastas / باستا).
+                {t("dashboard.catFormDesc")}
               </p>
             </div>
 
@@ -828,14 +797,14 @@ export default function DashboardPage() {
               {/* English Category Name */}
               <div className="flex flex-col gap-1.5">
                 <label htmlFor="catNameEn" className="text-xs font-bold text-white/70 uppercase tracking-wider flex items-center justify-between">
-                  <span>Name (English) <span className="text-brand-red">*</span></span>
+                  <span>{t("dashboard.fieldCatNameEn")} <span className="text-brand-red">*</span></span>
                   <span className="text-[10px] text-brand-gold lowercase select-none">EN</span>
                 </label>
                 <input
                   id="catNameEn"
                   type="text"
                   required
-                  placeholder="e.g. Burgers"
+                  placeholder={t("dashboard.fieldCatNameEnPlaceholder")}
                   value={catNameEn}
                   onChange={(e) => setCatNameEn(e.target.value)}
                   className="w-full bg-black border border-white/10 focus:border-brand-gold rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition-all"
@@ -845,7 +814,7 @@ export default function DashboardPage() {
               {/* Arabic Category Name */}
               <div className="flex flex-col gap-1.5">
                 <label htmlFor="catNameAr" className="text-xs font-bold text-white/70 uppercase tracking-wider flex items-center justify-between">
-                  <span>البرجر <span className="text-brand-red">*</span></span>
+                  <span>{t("dashboard.fieldCatNameAr")} <span className="text-brand-red">*</span></span>
                   <span className="text-[10px] text-brand-gold lowercase select-none">AR (العربية)</span>
                 </label>
                 <input
@@ -853,7 +822,7 @@ export default function DashboardPage() {
                   type="text"
                   required
                   dir="rtl"
-                  placeholder="مثال: البرجر"
+                  placeholder={t("dashboard.fieldCatNameArPlaceholder")}
                   value={catNameAr}
                   onChange={(e) => setCatNameAr(e.target.value)}
                   className="w-full bg-black border border-white/10 focus:border-brand-gold rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition-all text-right"
@@ -867,7 +836,7 @@ export default function DashboardPage() {
                     onClick={clearCatForm}
                     className="flex-1 py-2.5 border border-white/10 hover:border-white/20 text-white rounded-xl text-xs font-bold uppercase transition-all"
                   >
-                    Cancel
+                    {t("dashboard.cancelBtn")}
                   </button>
                 )}
                 <button
@@ -878,10 +847,10 @@ export default function DashboardPage() {
                   {(addCatMutation.isPending || updateCatMutation.isPending) ? (
                     <Loader2 className="animate-spin" size={14} />
                   ) : editingCatId ? (
-                    "Update"
+                    t("dashboard.saveCatBtn")
                   ) : (
                     <span className="flex items-center gap-1.5">
-                      <Plus size={14} /> Add Category
+                      <Plus size={14} /> {t("dashboard.addCatBtn")}
                     </span>
                   )}
                 </button>
@@ -889,8 +858,11 @@ export default function DashboardPage() {
             </form>
 
             <div className="p-4 bg-brand-red/5 border border-brand-red/10 rounded-2xl text-[10px] text-white/60 leading-relaxed font-light">
-              <span className="font-bold text-brand-red block mb-1">⚠️ Warning</span>
-              Deleting a category will not automatically delete its menu items. Make sure to update items to a new category before deletion.
+              <span className="font-bold text-brand-red block mb-1">⚠️ {lang === "ar" ? "تحذير" : "Warning"}</span>
+              {lang === "ar" 
+                ? "حذف التصنيف لن يحذف الأطباق التابعة له تلقائياً. يرجى التأكد من نقل الأطباق لتصنيف آخر قبل الحذف."
+                : "Deleting a category will not automatically delete its menu items. Make sure to update items to a new category before deletion."
+              }
             </div>
           </div>
 
@@ -899,14 +871,14 @@ export default function DashboardPage() {
             {isLoading ? (
               <div className="flex flex-col gap-4 py-12 items-center justify-center text-white/50 bg-card-bg border border-white/5 rounded-3xl">
                 <Loader2 className="animate-spin text-brand-gold" size={32} />
-                <span className="text-sm font-medium">Loading categories...</span>
+                <span className="text-sm font-medium">{lang === "ar" ? "جاري التحميل..." : "Loading categories..."}</span>
               </div>
             ) : categories.length === 0 ? (
               <div className="bg-card-bg border border-white/5 rounded-3xl p-12 text-center flex flex-col items-center justify-center gap-3">
                 <span className="text-3xl">📁</span>
-                <h3 className="text-base font-bold text-white mt-1">No Categories Created</h3>
+                <h3 className="text-base font-bold text-white mt-1">{t("dashboard.noCategories")}</h3>
                 <p className="text-xs text-white/40 max-w-xs font-light">
-                  Add custom categories on the left to start classifying your items.
+                  {lang === "ar" ? "أضف تصنيفات مخصصة من اليسار للبدء." : "Add custom categories on the left to start classifying your items."}
                 </p>
               </div>
             ) : (
@@ -914,9 +886,9 @@ export default function DashboardPage() {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-white/10 bg-white/2 text-white/40 uppercase tracking-widest text-[9px] font-extrabold select-none">
-                      <th className="p-4">Category (English / العربية)</th>
+                      <th className="p-4">{t("dashboard.categoryList")} (English / العربية)</th>
                       <th className="p-4">Document ID</th>
-                      <th className="p-4 text-right w-24">Actions</th>
+                      <th className="p-4 text-right w-24">{t("dashboard.actions")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5 text-sm">
@@ -932,19 +904,19 @@ export default function DashboardPage() {
                           <div className="flex justify-end gap-1.5">
                             <button
                               onClick={() => startEditCat(cat)}
-                              title="Edit Category Name"
+                              title={t("dashboard.edit")}
                               className="p-1.5 text-white/50 hover:text-brand-gold hover:bg-white/5 rounded-lg transition-all"
                             >
                               <Edit3 size={15} />
                             </button>
                             <button
                               onClick={() => {
-                                if (confirm(`Are you sure you want to delete Category "${cat.nameEn}"?`)) {
+                                if (confirm(lang === "ar" ? `هل أنت متأكد من رغبتك في حذف التصنيف "${cat.nameAr}"؟` : `Are you sure you want to delete Category "${cat.nameEn}"?`)) {
                                   deleteCatMutation.mutate(cat.id);
                                 }
                               }}
                               disabled={deleteCatMutation.isPending}
-                              title="Delete Category"
+                              title={t("dashboard.delete")}
                               className="p-1.5 text-white/50 hover:text-brand-red hover:bg-white/5 rounded-lg transition-all"
                             >
                               {deleteCatMutation.isPending ? (

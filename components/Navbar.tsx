@@ -4,12 +4,14 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Languages } from "lucide-react";
+import { useLanguage } from "@/lib/translations";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const { lang, t, setLanguage } = useLanguage();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,10 +26,10 @@ export default function Navbar() {
   }, []);
 
   const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "Menu", href: "/menu" },
-    { name: "About", href: "/about" },
-    { name: "Dashboard", href: "/dashboard" },
+    { name: t("navbar.home"), href: "/" },
+    { name: t("navbar.menu"), href: "/menu" },
+    { name: t("navbar.about"), href: "/about" },
+    { name: t("navbar.dashboard"), href: "/dashboard" },
   ];
 
   return (
@@ -43,7 +45,7 @@ export default function Navbar() {
         <Link href="/" className="flex items-center gap-3 group">
           <div className="relative w-10 h-10 rounded-full overflow-hidden border border-brand-gold/30 group-hover:border-brand-gold transition-colors duration-300">
             <Image
-              src="/images/logo.png"
+              src="/images/logo.jpeg"
               alt="Take Five Logo"
               fill
               className="object-cover"
@@ -55,7 +57,7 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden md:flex items-center gap-6">
           {navLinks.map((link) => {
             const isActive = pathname === link.href;
             return (
@@ -73,12 +75,15 @@ export default function Navbar() {
               </Link>
             );
           })}
-          <Link
-            href="/menu"
-            className="px-5 py-2 text-xs font-semibold uppercase tracking-wider text-black bg-brand-gold rounded-full hover:bg-brand-gold/90 hover:scale-105 transition-all duration-300"
+          
+          {/* Language Toggle */}
+          <button
+            onClick={() => setLanguage(lang === "en" ? "ar" : "en")}
+            className="px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider border border-white/10 hover:border-brand-gold/50 rounded-full text-white/90 hover:text-brand-gold hover:scale-105 transition-all duration-300 flex items-center gap-1.5 bg-white/5 hover:bg-white/10 cursor-pointer"
           >
-            Order Now
-          </Link>
+            <Languages size={14} />
+            <span>{lang === "en" ? "العربية" : "English"}</span>
+          </button>
         </nav>
 
         {/* Mobile Menu Button */}
@@ -105,7 +110,7 @@ export default function Navbar() {
           <X size={28} />
         </button>
         
-        <nav className="flex flex-col gap-8">
+        <nav className="flex flex-col items-center gap-6">
           {navLinks.map((link) => {
             const isActive = pathname === link.href;
             return (
@@ -121,13 +126,18 @@ export default function Navbar() {
               </Link>
             );
           })}
-          <Link
-            href="/menu"
-            onClick={() => setIsOpen(false)}
-            className="w-full min-w-[200px] py-4 px-6 text-sm font-semibold uppercase tracking-wider text-black bg-brand-gold rounded-full hover:bg-brand-gold/90 transition-all duration-300 mt-4"
+
+          {/* Mobile Language Toggle */}
+          <button
+            onClick={() => {
+              setLanguage(lang === "en" ? "ar" : "en");
+              setIsOpen(false);
+            }}
+            className="w-full min-w-[200px] py-3.5 px-6 text-sm font-bold uppercase tracking-wider border border-white/10 hover:border-brand-gold/50 rounded-full text-white/90 hover:text-brand-gold transition-all duration-300 flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 mt-4 cursor-pointer"
           >
-            Order Now
-          </Link>
+            <Languages size={16} />
+            <span>{lang === "en" ? "العربية" : "English"}</span>
+          </button>
         </nav>
       </div>
     </header>
