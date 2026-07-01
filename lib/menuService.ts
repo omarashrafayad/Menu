@@ -30,6 +30,7 @@ export interface Category {
   nameEn: string; // English Category Name
   descriptionAr: string; // Arabic Category Description
   descriptionEn: string; // English Category Description
+  order?: number; // Sorting/display order of category
   // For backward compatibility
   name?: string;
 }
@@ -148,11 +149,18 @@ export async function getCategories(): Promise<Category[]> {
       nameEn: data.nameEn || data.name || "",
       descriptionAr: data.descriptionAr || "",
       descriptionEn: data.descriptionEn || "",
+      order: typeof data.order === 'number' ? data.order : 0,
       // Include legacy field as fallback
       name: data.name || ""
     });
   });
-  return items;
+  
+  // Sort categories by order ascending. If orders are equal, fall back to alphabetical En
+  return items.sort((a, b) => {
+    const diff = (a.order ?? 0) - (b.order ?? 0);
+    if (diff !== 0) return diff;
+    return a.nameEn.localeCompare(b.nameEn);
+  });
 }
 
 export async function addCategory(category: Omit<Category, "id">): Promise<string> {
@@ -176,10 +184,10 @@ export async function seedInitialMenuItems(): Promise<void> {
   const existingCats = await getCategories();
   if (existingCats.length === 0) {
     const initialCategories = [
-      { id: "appetizers", nameAr: "المقبلات", nameEn: "Appetizers", descriptionAr: "بداية شهية لرحلتك مع أطباقنا اللذيذة", descriptionEn: "A delicious start to your meal with our savory bites" },
-      { id: "mains", nameAr: "الأطباق الرئيسية", nameEn: "Main Courses", descriptionAr: "أطباقنا الحضرية المميزة المحضرة بكل شغف", descriptionEn: "Our signature urban mains crafted with passion" },
-      { id: "desserts", nameAr: "الحلويات", nameEn: "Desserts", descriptionAr: "نهاية حلوة ومثالية ليومك", descriptionEn: "A sweet and perfect ending to your day" },
-      { id: "drinks", nameAr: "المشروبات", nameEn: "Drinks", descriptionAr: "مشروبات منعشة لتكتمل تجربتك", descriptionEn: "Refreshing beverages to complete your dining experience" }
+      { id: "appetizers", nameAr: "المقبلات", nameEn: "Appetizers", descriptionAr: "بداية شهية لرحلتك مع أطباقنا اللذيذة", descriptionEn: "A delicious start to your meal with our savory bites", order: 1 },
+      { id: "mains", nameAr: "الأطباق الرئيسية", nameEn: "Main Courses", descriptionAr: "أطباقنا الحضرية المميزة المحضرة بكل شغف", descriptionEn: "Our signature urban mains crafted with passion", order: 2 },
+      { id: "desserts", nameAr: "الحلويات", nameEn: "Desserts", descriptionAr: "نهاية حلوة ومثالية ليومك", descriptionEn: "A sweet and perfect ending to your day", order: 3 },
+      { id: "drinks", nameAr: "المشروبات", nameEn: "Drinks", descriptionAr: "مشروبات منعشة لتكتمل تجربتك", descriptionEn: "Refreshing beverages to complete your dining experience", order: 4 }
     ];
     
     const catBatch = writeBatch(db);
@@ -189,7 +197,8 @@ export async function seedInitialMenuItems(): Promise<void> {
         nameAr: cat.nameAr, 
         nameEn: cat.nameEn,
         descriptionAr: cat.descriptionAr,
-        descriptionEn: cat.descriptionEn
+        descriptionEn: cat.descriptionEn,
+        order: cat.order
       });
     });
     await catBatch.commit();

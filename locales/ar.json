@@ -110,6 +110,8 @@
     "fieldPrice": "السعر (بالدولار)",
     "fieldPricePlaceholder": "مثال: 14.50",
     "fieldCategory": "التصنيف",
+    "fieldCatOrder": "ترتيب العرض",
+    "fieldCatOrderPlaceholder": "مثال: 1 (الأرقام الأصغر تظهر أولاً)",
     "fieldImage": "رفع الصورة / رابط الصورة",
     "fieldCatNameAr": "اسم التصنيف (العربية)",
     "fieldCatNameArPlaceholder": "مثال: برجر",

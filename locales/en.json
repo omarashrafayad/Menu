@@ -120,6 +120,8 @@
     "fieldPrice": "Price ($)",
     "fieldPricePlaceholder": "e.g. 14.50",
     "fieldCategory": "Category",
+    "fieldCatOrder": "Display Order",
+    "fieldCatOrderPlaceholder": "e.g. 1 (smaller numbers show first)",
     "fieldImage": "Image Upload / URL",
     "fieldCatNameAr": "Category Name (Arabic)",
     "fieldCatNameArPlaceholder": "e.g. برجر",

@@ -75,6 +75,7 @@ export default function DashboardPage() {
   const [catNameEn, setCatNameEn] = useState("");
   const [catDescAr, setCatDescAr] = useState("");
   const [catDescEn, setCatDescEn] = useState("");
+  const [catOrder, setCatOrder] = useState("");
   const [editingCatId, setEditingCatId] = useState<string | null>(null);
 
   // Queries
@@ -219,6 +220,7 @@ export default function DashboardPage() {
     setCatNameEn("");
     setCatDescAr("");
     setCatDescEn("");
+    setCatOrder("");
     setEditingCatId(null);
   };
 
@@ -285,11 +287,14 @@ export default function DashboardPage() {
       return;
     }
 
+    const orderNum = catOrder.trim() !== "" ? parseInt(catOrder.trim(), 10) : 0;
+
     const payload = {
       nameAr: catNameAr.trim(),
       nameEn: catNameEn.trim(),
       descriptionAr: catDescAr.trim(),
-      descriptionEn: catDescEn.trim()
+      descriptionEn: catDescEn.trim(),
+      order: isNaN(orderNum) ? 0 : orderNum
     };
 
     if (editingCatId) {
@@ -324,6 +329,7 @@ export default function DashboardPage() {
     setCatNameEn(cat.nameEn || cat.name || "");
     setCatDescAr(cat.descriptionAr || "");
     setCatDescEn(cat.descriptionEn || "");
+    setCatOrder(cat.order !== undefined ? String(cat.order) : "");
   };
 
   // Filter items based on search and category selector
@@ -937,6 +943,22 @@ export default function DashboardPage() {
                 />
               </div>
 
+              {/* Display Order */}
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="catOrder" className="text-xs font-bold text-white/70 uppercase tracking-wider flex items-center justify-between">
+                  <span>{t("dashboard.fieldCatOrder")}</span>
+                  <span className="text-[10px] text-brand-gold lowercase select-none">Order</span>
+                </label>
+                <input
+                  id="catOrder"
+                  type="number"
+                  placeholder={t("dashboard.fieldCatOrderPlaceholder")}
+                  value={catOrder}
+                  onChange={(e) => setCatOrder(e.target.value)}
+                  className="w-full bg-black border border-white/10 focus:border-brand-gold rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition-all"
+                />
+              </div>
+
               <div className="flex gap-3 mt-2">
                 {editingCatId && (
                   <button
@@ -995,6 +1017,7 @@ export default function DashboardPage() {
                   <thead>
                     <tr className="border-b border-white/10 bg-white/2 text-white/40 uppercase tracking-widest text-[9px] font-extrabold select-none">
                       <th className="p-4">{t("dashboard.categoryList")} (English / العربية)</th>
+                      <th className="p-4 text-center w-24">{t("dashboard.fieldCatOrder")}</th>
                       <th className="p-4">Document ID</th>
                       <th className="p-4 text-right w-24">{t("dashboard.actions")}</th>
                     </tr>
@@ -1018,6 +1041,11 @@ export default function DashboardPage() {
                               )}
                             </div>
                           )}
+                        </td>
+                        <td className="p-4 text-center">
+                          <span className="text-xs sm:text-sm font-bold text-brand-gold font-mono bg-black/40 px-2.5 py-1 rounded border border-white/5">
+                            {cat.order ?? 0}
+                          </span>
                         </td>
                         <td className="p-4 font-mono text-xs text-white/40">{cat.id}</td>
                         <td className="p-4 text-right">
