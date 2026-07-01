@@ -35,6 +35,7 @@ export default function MenuPage() {
     return {
       id: cat.id,
       name: lang === "ar" ? cat.nameAr : cat.nameEn,
+      description: lang === "ar" ? cat.descriptionAr : cat.descriptionEn,
       colorClass: isEven ? "text-brand-gold" : "text-brand-red",
       borderClass: isEven ? "border-brand-gold/35" : "border-brand-red/35",
     };
@@ -139,7 +140,7 @@ export default function MenuPage() {
       </div>
 
       {/* Categories Filter Horizontal Pills */}
-      <div className="flex items-center justify-start md:justify-center overflow-x-auto gap-3 pb-4 scrollbar-none snap-x select-none -mx-4 px-4 sm:-mx-6 sm:px-6">
+      <div className="flex items-center flex-wrap justify-start md:justify-center overflow-x-auto gap-3 pb-4 scrollbar-none snap-x select-none -mx-4 px-4 sm:-mx-6 sm:px-6">
         {categories.map((category) => {
           const isActive = activeCategory === category.id;
           return (
@@ -170,11 +171,18 @@ export default function MenuPage() {
             return (
               <div key={section.id} className="flex flex-col gap-8 scroll-mt-24" id={section.id}>
                 {/* Section Title */}
-                <div className="flex items-center gap-4">
-                  <h2 className={`text-xl sm:text-2xl font-extrabold uppercase tracking-widest ${section.colorClass}`}>
-                    {section.name}
-                  </h2>
-                  <div className={`flex-1 h-[1px] border-t border-dashed ${section.borderClass}`} />
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-4">
+                    <h2 className={`text-xl sm:text-2xl font-extrabold uppercase tracking-widest ${section.colorClass}`}>
+                      {section.name}
+                    </h2>
+                    <div className={`flex-1 h-[1px] border-t border-dashed ${section.borderClass}`} />
+                  </div>
+                  {section.description && (
+                    <p className={`text-xs sm:text-sm text-white/55 font-light leading-relaxed max-w-2xl ${lang === "ar" ? "text-right" : "text-left"}`} style={{ contentVisibility: 'auto' }}>
+                      {section.description}
+                    </p>
+                  )}
                 </div>
 
                 {/* Items Grid */}

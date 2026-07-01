@@ -18,7 +18,7 @@ const translations: Record<Language, Record<string, unknown>> = { en, ar };
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [lang, setLang] = useState<Language>("en");
+  const [lang, setLang] = useState<Language>("ar");
 
   // Read language from localStorage or default to browser language on mount
   useEffect(() => {
@@ -28,7 +28,9 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       setLang(savedLang);
     } else {
       const browserLang = navigator.language.split("-")[0];
-      if (browserLang === "ar") {
+      if (browserLang === "en") {
+        setLang("en");
+      } else {
         setLang("ar");
       }
     }

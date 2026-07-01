@@ -49,6 +49,8 @@ export default function DashboardPage() {
   // Search & Filter State
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
   // File Upload State
@@ -71,6 +73,8 @@ export default function DashboardPage() {
   // Category Form State (Bilingual)
   const [catNameAr, setCatNameAr] = useState("");
   const [catNameEn, setCatNameEn] = useState("");
+  const [catDescAr, setCatDescAr] = useState("");
+  const [catDescEn, setCatDescEn] = useState("");
   const [editingCatId, setEditingCatId] = useState<string | null>(null);
 
   // Queries
@@ -213,6 +217,8 @@ export default function DashboardPage() {
   const clearCatForm = () => {
     setCatNameAr("");
     setCatNameEn("");
+    setCatDescAr("");
+    setCatDescEn("");
     setEditingCatId(null);
   };
 
@@ -281,7 +287,9 @@ export default function DashboardPage() {
 
     const payload = {
       nameAr: catNameAr.trim(),
-      nameEn: catNameEn.trim()
+      nameEn: catNameEn.trim(),
+      descriptionAr: catDescAr.trim(),
+      descriptionEn: catDescEn.trim()
     };
 
     if (editingCatId) {
@@ -314,10 +322,18 @@ export default function DashboardPage() {
     setEditingCatId(cat.id);
     setCatNameAr(cat.nameAr || cat.name || "");
     setCatNameEn(cat.nameEn || cat.name || "");
+    setCatDescAr(cat.descriptionAr || "");
+    setCatDescEn(cat.descriptionEn || "");
   };
 
   // Filter items based on search and category selector
   const filteredItems = menuItems.filter(item => {
+    // 1. Category Filter
+    if (selectedCategory !== "all" && item.category !== selectedCategory) {
+      return false;
+    }
+
+    // 2. Search Term Filter
     const searchLower = searchTerm.toLowerCase().trim();
     if (!searchLower) return true;
     
@@ -328,6 +344,11 @@ export default function DashboardPage() {
       (item.descriptionAr && item.descriptionAr.toLowerCase().includes(searchLower))
     );
   });
+
+
+  const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedItems = filteredItems.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   const isLoading = isItemsLoading || isCategoriesLoading;
   const hasError = itemsError || categoriesError;
@@ -619,7 +640,10 @@ export default function DashboardPage() {
                   type="text"
                   placeholder={t("dashboard.searchPlaceholder")}
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="w-full bg-black border border-white/10 focus:border-brand-gold rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none transition-all"
                 />
               </div>
@@ -629,7 +653,10 @@ export default function DashboardPage() {
                 <Filter className="text-white/40 flex-shrink-0" size={16} />
                 <div className="flex gap-1 overflow-x-auto scrollbar-none py-1 select-none w-full">
                   <button
-                    onClick={() => setSelectedCategory("all")}
+                    onClick={() => {
+                      setSelectedCategory("all");
+                      setCurrentPage(1);
+                    }}
                     className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border flex-shrink-0 ${
                       selectedCategory === "all"
                         ? "bg-brand-gold border-brand-gold text-black"
@@ -641,7 +668,10 @@ export default function DashboardPage() {
                   {categories.map((cat) => (
                     <button
                       key={cat.id}
-                      onClick={() => setSelectedCategory(cat.id)}
+                      onClick={() => {
+                        setSelectedCategory(cat.id);
+                        setCurrentPage(1);
+                      }}
                       className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border flex-shrink-0 ${
                         selectedCategory === cat.id
                           ? "bg-brand-gold border-brand-gold text-black"
@@ -683,7 +713,7 @@ export default function DashboardPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5 text-sm">
-                    {filteredItems.map((item) => {
+                    {paginatedItems.map((item) => {
                       const cat = categories.find(c => c.id === item.category);
                       const categoryName = cat ? (lang === "ar" ? cat.nameAr : cat.nameEn) : item.category;
                       const title = lang === "ar" ? item.titleAr : item.titleEn;
@@ -763,11 +793,56 @@ export default function DashboardPage() {
               </div>
             )}
 
+            {/* Pagination Controls */}
+            {!isLoading && !hasError && totalPages > 1 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4 px-2 select-none">
+                <div className="text-xs text-white/50 font-light order-2 sm:order-1 font-sans">
+                  {lang === "ar" ? (
+                    <>عرض <span className="text-white font-semibold">{startIndex + 1}</span> - <span className="text-white font-semibold">{Math.min(startIndex + ITEMS_PER_PAGE, filteredItems.length)}</span> من أصل <span className="text-brand-gold font-semibold">{filteredItems.length}</span> أطباق</>
+                  ) : (
+                    <>Showing <span className="text-white font-semibold">{startIndex + 1}</span> - <span className="text-white font-semibold">{Math.min(startIndex + ITEMS_PER_PAGE, filteredItems.length)}</span> of <span className="text-brand-gold font-semibold">{filteredItems.length}</span> items</>
+                  )}
+                </div>
+                <div className="flex items-center gap-1.5 order-1 sm:order-2">
+                  <button
+                    type="button"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white/5 border border-white/5 hover:border-white/10 hover:bg-white/10 disabled:opacity-30 disabled:pointer-events-none text-white transition-all cursor-pointer"
+                  >
+                    {lang === "ar" ? "السابق" : "Prev"}
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      type="button"
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        currentPage === page
+                          ? "bg-brand-gold border border-brand-gold text-black"
+                          : "bg-black/50 border border-white/5 text-white/60 hover:text-white"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white/5 border border-white/5 hover:border-white/10 hover:bg-white/10 disabled:opacity-30 disabled:pointer-events-none text-white transition-all cursor-pointer"
+                  >
+                    {lang === "ar" ? "التالي" : "Next"}
+                  </button>
+                </div>
+              </div>
+            )}
+
             {!isLoading && !hasError && filteredItems.length > 0 && (
-              <div className="text-[10px] text-white/40 font-bold uppercase tracking-widest text-right mr-2">
+              <div className="text-[10px] text-white/40 font-bold uppercase tracking-widest text-right mr-2 mt-4">
                 {lang === "ar" 
-                  ? `عرض ${filteredItems.length} من أصل ${menuItems.length} أطباق`
-                  : `Showing ${filteredItems.length} of ${menuItems.length} items`
+                  ? `عرض ${filteredItems.length} من أصل ${menuItems.length} أطباق مصفاة`
+                  : `Showing ${filteredItems.length} of ${menuItems.length} filtered items`
                 }
               </div>
             )}
@@ -826,6 +901,39 @@ export default function DashboardPage() {
                   value={catNameAr}
                   onChange={(e) => setCatNameAr(e.target.value)}
                   className="w-full bg-black border border-white/10 focus:border-brand-gold rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition-all text-right"
+                />
+              </div>
+
+              {/* English Category Description */}
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="catDescEn" className="text-xs font-bold text-white/70 uppercase tracking-wider flex items-center justify-between">
+                  <span>{t("dashboard.fieldCatDescEn")}</span>
+                  <span className="text-[10px] text-brand-gold lowercase select-none">EN</span>
+                </label>
+                <textarea
+                  id="catDescEn"
+                  rows={2}
+                  placeholder={t("dashboard.fieldCatDescEnPlaceholder")}
+                  value={catDescEn}
+                  onChange={(e) => setCatDescEn(e.target.value)}
+                  className="w-full bg-black border border-white/10 focus:border-brand-gold rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition-all resize-none"
+                />
+              </div>
+
+              {/* Arabic Category Description */}
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="catDescAr" className="text-xs font-bold text-white/70 uppercase tracking-wider flex items-center justify-between">
+                  <span>{t("dashboard.fieldCatDescAr")}</span>
+                  <span className="text-[10px] text-brand-gold lowercase select-none">AR (العربية)</span>
+                </label>
+                <textarea
+                  id="catDescAr"
+                  rows={2}
+                  dir="rtl"
+                  placeholder={t("dashboard.fieldCatDescArPlaceholder")}
+                  value={catDescAr}
+                  onChange={(e) => setCatDescAr(e.target.value)}
+                  className="w-full bg-black border border-white/10 focus:border-brand-gold rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition-all text-right resize-none"
                 />
               </div>
 
@@ -895,9 +1003,21 @@ export default function DashboardPage() {
                     {categories.map((cat) => (
                       <tr key={cat.id} className="hover:bg-white/2 transition-colors duration-200">
                         <td className="p-4">
-                          <span className="font-bold text-white">{cat.nameEn}</span>
-                          <span className="text-white/40 mx-2">/</span>
-                          <span className="font-bold text-brand-gold" dir="rtl">{cat.nameAr}</span>
+                          <div>
+                            <span className="font-bold text-white">{cat.nameEn}</span>
+                            <span className="text-white/40 mx-2">/</span>
+                            <span className="font-bold text-brand-gold" dir="rtl">{cat.nameAr}</span>
+                          </div>
+                          {(cat.descriptionEn || cat.descriptionAr) && (
+                            <div className="text-xs font-light mt-1 flex flex-col gap-0.5">
+                              {cat.descriptionEn && (
+                                <div className="text-white/50">{cat.descriptionEn}</div>
+                              )}
+                              {cat.descriptionAr && (
+                                <div className="text-brand-gold/60" dir="rtl">{cat.descriptionAr}</div>
+                              )}
+                            </div>
+                          )}
                         </td>
                         <td className="p-4 font-mono text-xs text-white/40">{cat.id}</td>
                         <td className="p-4 text-right">

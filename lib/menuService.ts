@@ -28,6 +28,8 @@ export interface Category {
   id: string; // Firestore document ID
   nameAr: string; // Arabic Category Name
   nameEn: string; // English Category Name
+  descriptionAr: string; // Arabic Category Description
+  descriptionEn: string; // English Category Description
   // For backward compatibility
   name?: string;
 }
@@ -144,6 +146,8 @@ export async function getCategories(): Promise<Category[]> {
       id: doc.id,
       nameAr: data.nameAr || data.name || "",
       nameEn: data.nameEn || data.name || "",
+      descriptionAr: data.descriptionAr || "",
+      descriptionEn: data.descriptionEn || "",
       // Include legacy field as fallback
       name: data.name || ""
     });
@@ -172,16 +176,21 @@ export async function seedInitialMenuItems(): Promise<void> {
   const existingCats = await getCategories();
   if (existingCats.length === 0) {
     const initialCategories = [
-      { id: "appetizers", nameAr: "المقبلات", nameEn: "Appetizers" },
-      { id: "mains", nameAr: "الأطباق الرئيسية", nameEn: "Main Courses" },
-      { id: "desserts", nameAr: "الحلويات", nameEn: "Desserts" },
-      { id: "drinks", nameAr: "المشروبات", nameEn: "Drinks" }
+      { id: "appetizers", nameAr: "المقبلات", nameEn: "Appetizers", descriptionAr: "بداية شهية لرحلتك مع أطباقنا اللذيذة", descriptionEn: "A delicious start to your meal with our savory bites" },
+      { id: "mains", nameAr: "الأطباق الرئيسية", nameEn: "Main Courses", descriptionAr: "أطباقنا الحضرية المميزة المحضرة بكل شغف", descriptionEn: "Our signature urban mains crafted with passion" },
+      { id: "desserts", nameAr: "الحلويات", nameEn: "Desserts", descriptionAr: "نهاية حلوة ومثالية ليومك", descriptionEn: "A sweet and perfect ending to your day" },
+      { id: "drinks", nameAr: "المشروبات", nameEn: "Drinks", descriptionAr: "مشروبات منعشة لتكتمل تجربتك", descriptionEn: "Refreshing beverages to complete your dining experience" }
     ];
     
     const catBatch = writeBatch(db);
     initialCategories.forEach((cat) => {
       const docRef = doc(db, CATEGORY_COLLECTION, cat.id);
-      catBatch.set(docRef, { nameAr: cat.nameAr, nameEn: cat.nameEn });
+      catBatch.set(docRef, { 
+        nameAr: cat.nameAr, 
+        nameEn: cat.nameEn,
+        descriptionAr: cat.descriptionAr,
+        descriptionEn: cat.descriptionEn
+      });
     });
     await catBatch.commit();
   }

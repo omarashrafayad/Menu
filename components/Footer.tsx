@@ -17,7 +17,7 @@ export default function Footer() {
         <div className="flex items-center gap-2">
           <div className="relative w-7 h-7 rounded-full overflow-hidden border border-brand-gold/30">
             <Image
-              src="/images/logo.png"
+              src="/images/logo.jpeg"
               alt="Take Five Logo"
               fill
               className="object-cover"

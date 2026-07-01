@@ -29,7 +29,7 @@ export default function Navbar() {
     { name: t("navbar.home"), href: "/" },
     { name: t("navbar.menu"), href: "/menu" },
     { name: t("navbar.about"), href: "/about" },
-    { name: t("navbar.dashboard"), href: "/dashboard" },
+    // { name: t("navbar.dashboard"), href: "/dashboard" },
   ];
 
   return (
@@ -86,14 +86,28 @@ export default function Navbar() {
           </button>
         </nav>
 
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden text-white hover:text-brand-gold p-1 focus:outline-none transition-colors duration-300"
-          aria-label="Toggle menu"
-        >
-          {isOpen ? <X size={26} /> : <Menu size={26} />}
-        </button>
+        {/* Mobile Actions: Language Toggle & Menu Button */}
+        <div className="flex md:hidden items-center gap-3">
+          <button
+            onClick={() => setLanguage(lang === "en" ? "ar" : "en")}
+            className="flex items-center bg-white/5 border border-white/10 rounded-full p-0.5 cursor-pointer select-none text-[10px] font-bold"
+          >
+            <span className={`px-2 py-0.5 rounded-full transition-all duration-300 ${lang === "en" ? "bg-brand-gold text-black font-extrabold" : "text-white/60 hover:text-white"}`}>
+              EN
+            </span>
+            <span className={`px-2 py-0.5 rounded-full transition-all duration-300 ${lang === "ar" ? "bg-brand-gold text-black font-extrabold" : "text-white/60 hover:text-white"}`}>
+              AR
+            </span>
+          </button>
+
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="text-white hover:text-brand-gold p-1 focus:outline-none transition-colors duration-300"
+            aria-label="Toggle menu"
+          >
+            {isOpen ? <X size={26} /> : <Menu size={26} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Drawer Overlay */}
@@ -126,18 +140,6 @@ export default function Navbar() {
               </Link>
             );
           })}
-
-          {/* Mobile Language Toggle */}
-          <button
-            onClick={() => {
-              setLanguage(lang === "en" ? "ar" : "en");
-              setIsOpen(false);
-            }}
-            className="w-full min-w-[200px] py-3.5 px-6 text-sm font-bold uppercase tracking-wider border border-white/10 hover:border-brand-gold/50 rounded-full text-white/90 hover:text-brand-gold transition-all duration-300 flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 mt-4 cursor-pointer"
-          >
-            <Languages size={16} />
-            <span>{lang === "en" ? "العربية" : "English"}</span>
-          </button>
         </nav>
       </div>
     </header>
